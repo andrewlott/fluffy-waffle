@@ -6,7 +6,7 @@ public class Tile : MonoBehaviour {
 
 	public Slot slot;
 
-	public static float animationDuration = 1.0f;
+	public static float animationDuration = 0.125f;
 	private Vector3 startPosition;
 	private float startTime;
 
@@ -29,12 +29,11 @@ public class Tile : MonoBehaviour {
 			return;
 		}
 		if (this.slot.gameObject.transform.position != this.gameObject.transform.position) {
-			this.gameObject.transform.position = this.slot.gameObject.transform.position;
-//			if (this.startTime == 0) {
-//				this.startPosition = this.gameObject.transform.position;
-//				this.startTime = Time.time;
-//			}
-//			this.gameObject.transform.position = Vector3.Lerp (this.startPosition, this.slot.gameObject.transform.position, (Time.time - this.startTime) / animationDuration);
+			if (this.startTime == 0) {
+				this.startPosition = this.gameObject.transform.position;
+				this.startTime = Time.time;
+			}
+			this.gameObject.transform.position = Vector3.Lerp (this.startPosition, this.slot.gameObject.transform.position, (Time.time - this.startTime) / animationDuration);
 		} else if (this.startTime != 0) {
 			this.startTime = 0;
 			this.startPosition = Vector3.zero;

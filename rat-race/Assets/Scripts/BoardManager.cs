@@ -178,14 +178,14 @@ public class BoardManager : MonoBehaviour {
 		
 		List<Instruction>.Enumerator e = this.instructions.GetEnumerator ();
 		int i = 0;
-		float delay = 0.5f;
+		float delay = Tile.animationDuration / 2.0f;
 		while (e.MoveNext ()) {
 			Instruction instruction = e.Current;
-			this.StartCoroutine (this.SetMovement (Tile.animationDuration * i + delay, instruction.actor, instruction.direction));
+			this.StartCoroutine (this.SetMovement ((Tile.animationDuration + delay) * i , instruction.actor, instruction.direction));
 
 			i++;
 		}
-		this.StartCoroutine (Reveal (i * Tile.animationDuration + delay));
+		this.StartCoroutine (Reveal ((Tile.animationDuration + delay) * i));
 	}
 
 	private IEnumerator SetMovement(float delay, Tile actor, Direction direction) {
