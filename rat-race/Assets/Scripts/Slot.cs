@@ -3,6 +3,23 @@ using System.Collections;
 
 public class Slot : MonoBehaviour {
 
+	public int x, y, index;
+
+	public Tile tile;
+	public Target target;
+
+	public void SetTile(Tile _tile) {
+		this.tile = _tile;
+	}
+
+	public void UnsetTile() {
+		this.tile = null;
+	}
+
+	public void SetTarget(Target _target) {
+		this.target = _target;
+	}
+
 	// Use this for initialization
 	void Start () {
 
@@ -14,6 +31,15 @@ public class Slot : MonoBehaviour {
 	}
 
 	void OnMouseUp() {
-		Debug.LogFormat ("pressed! x:{0}, y:{1}", this.gameObject.transform.position.x, this.gameObject.transform.position.y);
+		BoardManager.Instance ().target.ShowView (this.target != null);
+		Tile cheese = Instantiate (BoardManager.Instance().cheese);
+		cheese.gameObject.transform.position = this.gameObject.transform.position;
+
+		this.StartCoroutine (this.RestartCoroutine());
+	}
+
+	IEnumerator RestartCoroutine() {
+		yield return new WaitForSeconds (2.0f);
+		Application.LoadLevel("Main");
 	}
 }
