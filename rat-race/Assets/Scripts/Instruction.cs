@@ -8,29 +8,36 @@ public class Instruction : MonoBehaviour {
 	[SerializeField]
 	GameObject[] directionContainers;
 
+	public Tile actor;
+	public Direction direction;
+
 	// Use this for initialization
 	void Start () {
 	
 	}
 
-	public void SetupWithActorAndDirection (GameObject actor, Direction direction) {
-		this.actorRenderer.sprite = actor.GetComponentInChildren<SpriteRenderer> ().sprite;
+	public void SetupWithActorAndDirection (Tile _actor, Direction _direction) {
+		this.actor = _actor;
+		this.direction = _direction;
 
-		for (int i = 0; i < directionContainers.Length; i++) {
-			directionContainers [i].SetActive (false);
+
+		this.actorRenderer.sprite = this.actor.GetComponentInChildren<SpriteRenderer> ().sprite;
+
+		for (int i = 0; i < this.directionContainers.Length; i++) {
+			this.directionContainers [i].SetActive (false);
 		}
-		switch (direction) {
+		switch (this.direction) {
 		case Direction.Up:
-			directionContainers [0].SetActive (true);
+			this.directionContainers [0].SetActive (true);
 			break;
 		case Direction.Down:
-			directionContainers [1].SetActive (true);
+			this.directionContainers [1].SetActive (true);
 			break;
 		case Direction.Left:
-			directionContainers [2].SetActive (true);
+			this.directionContainers [2].SetActive (true);
 			break;
 		case Direction.Right:
-			directionContainers [3].SetActive (true);
+			this.directionContainers [3].SetActive (true);
 			break;
 		default:
 			break;

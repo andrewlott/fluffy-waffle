@@ -31,15 +31,10 @@ public class Slot : MonoBehaviour {
 	}
 
 	void OnMouseUp() {
-		BoardManager.Instance ().target.ShowView (this.target != null);
-		Tile cheese = Instantiate (BoardManager.Instance().cheese);
-		cheese.gameObject.transform.position = this.gameObject.transform.position;
+		if (BoardManager.Instance ().hasCheeseBeenPlaced) {
+			return;
+		}
 
-		this.StartCoroutine (this.RestartCoroutine());
-	}
-
-	IEnumerator RestartCoroutine() {
-		yield return new WaitForSeconds (2.0f);
-		Application.LoadLevel("Main");
+		BoardManager.Instance ().CheesePlaced (this);
 	}
 }

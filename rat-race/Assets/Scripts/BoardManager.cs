@@ -21,14 +21,18 @@ public class BoardManager : MonoBehaviour {
 	[SerializeField]
 	Tile mouse;
 	[SerializeField]
-	public Tile cheese;
+	public Tile cheesePrefab;
 	[SerializeField]
 	public Target target;
 	[SerializeField]
 	GameObject instructionArea;
 
+	public bool hasCheeseBeenPlaced = false;
+
 	private float unit = 0.32f;
 	private List<Slot> slots;
+	private List<Instruction> instructions = new List<Instruction>();
+	private Tile cheese;
 
 	private static BoardManager _instance;
 	public static BoardManager Instance() {
@@ -85,16 +89,13 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	private void MakeTiles() {
-		this.JoinSlotAndTile (this.RandomUnoccupiedSlot (), this.mouse, false);
+		this.JoinSlotAndTile (this.RandomUnoccupiedSlot (), this.mouse);
 		this.mouse.gameObject.transform.position = this.mouse.slot.gameObject.transform.position;
 	}
 
-	private void JoinSlotAndTile(Slot slot, Tile tile, bool move) {
+	private void JoinSlotAndTile(Slot slot, Tile tile) {
 		slot.SetTile (tile);
 		tile.SetSlot (slot);
-		if (move) {
-			// animate it over
-		}
 	}
 
 	private void JoinSlotAndTarget(Slot slot, Target target) {
@@ -111,9 +112,10 @@ public class BoardManager : MonoBehaviour {
 		int x = this.mouse.slot.x;
 		int y = this.mouse.slot.y;
 
-		List<Direction> directions = new List<Direction> ();
+		this.instructions.Clear ();
+
 		int randomAmount = Random.Range (boardRadius, 2 * boardRadius);
-		while (directions.Count < randomAmount) {
+		while (this.instructions.Count < randomAmount) {
 			Direction randomDirection = (Direction)Random.Range (0, 4);
 			switch (randomDirection) {
 			case Direction.Up:
@@ -145,20 +147,20 @@ public class BoardManager : MonoBehaviour {
 			}
 
 			Instruction instruction = Instantiate (this.instructionPrefab);
-			instruction.SetupWithActorAndDirection (this.mouse.gameObject, randomDirection);
+			instruction.SetupWithActorAndDirection (this.mouse, randomDirection);
 			instruction.gameObject.transform.SetParent (this.instructionArea.gameObject.transform, false);
 
-			directions.Add (randomDirection); // prob dont need
+			this.instructions.Add (instruction);
 		}
 		this.JoinSlotAndTarget (this.SlotForCoordinate (x, y), this.target);
 	}
 
-	private int indexDeltaForDirection(Direction direction) {
+	private int IndexDeltaForDirection(Direction direction) {
 		switch (direction) {
 			case Direction.Up:
-				return -boardRadius;
+				return boardRadius * 2;
 			case Direction.Down:
-				return boardRadius;
+				return -boardRadius * 2;
 			case Direction.Left:
 				return -1;
 			case Direction.Right:
@@ -166,6 +168,43 @@ public class BoardManager : MonoBehaviour {
 			default:
 				return 0;
 		}
+	}
+
+	public void CheesePlaced(Slot cheeseSlot) {
+		this.hasCheeseBeenPlaced = true;
+		this.cheese = Instantiate (BoardManager.Instance().cheesePrefab).GetComponentInChildren<Tile>();
+		this.cheese.gameObject.transform.position = cheeseSlot.transform.position;
+		this.cheese.SetSlot (cheeseSlot);
+		
+		List<Instruction>.Enumerator e = this.instructions.GetEnumerator ();
+		int i = 0;
+		float delay = 0.5f;
+		while (e.MoveNext ()) {
+			Instruction instruction = e.Current;
+			this.StartCoroutine (this.SetMovement (Tile.animationDuration * i + delay, instruction.actor, instruction.direction));
+
+			i++;
+		}
+		this.StartCoroutine (Reveal (i * Tile.animationDuration + delay));
+	}
+
+	private IEnumerator SetMovement(float delay, Tile actor, Direction direction) {
+		yield return new WaitForSeconds (delay);
+
+		Slot nextSlot = this.SlotForIndex (actor.slot.index + this.IndexDeltaForDirection (direction));
+		this.JoinSlotAndTile (nextSlot, actor);
+	}
+
+	private IEnumerator Reveal(float delay) {
+		yield return new WaitForSeconds (delay);
+
+		this.target.ShowView (this.cheese.slot.target != null);
+		this.StartCoroutine (RestartCoroutine ());
+	}
+
+	private IEnumerator RestartCoroutine() {
+		yield return new WaitForSeconds (1.5f);
+		Application.LoadLevel("Main");
 	}
 	
 	// Update is called once per frame
