@@ -1,0 +1,23 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{3630C8E7-A813-AC09-D096-465E08A3C23F}") = "rat-race", "Assembly-CSharp.csproj", "{DA051F87-20BF-830D-0EF7-C7BB7270ED80}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA051F87-20BF-830D-0EF7-C7BB7270ED80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA051F87-20BF-830D-0EF7-C7BB7270ED80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA051F87-20BF-830D-0EF7-C7BB7270ED80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA051F87-20BF-830D-0EF7-C7BB7270ED80}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
