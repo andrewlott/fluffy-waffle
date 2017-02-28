@@ -1,8 +1,11 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/BoardManager.cs">
+  <MonoDevelop.Ide.Workbench>
     <Files>
-      <File FileName="Assets/Scripts/BoardManager.cs" Line="23" Column="24" />
+      <File FileName="Assets/Scripts/BoardManager.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Tile.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Slot.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Instruction.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
