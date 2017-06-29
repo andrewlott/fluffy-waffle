@@ -1,7 +1,7 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2008
-
-Project("{3630C8E7-A813-AC09-D096-465E08A3C23F}") = "rat-race", "Assembly-CSharp.csproj", "{DA051F87-20BF-830D-0EF7-C7BB7270ED80}"
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rat-race", "Assembly-CSharp.csproj", "{DA051F87-20BF-830D-0EF7-C7BB7270ED80}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

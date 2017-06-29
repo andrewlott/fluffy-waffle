@@ -8,8 +8,8 @@ public class Instruction : MonoBehaviour {
 	[SerializeField]
 	GameObject[] directionContainers;
 
-	public Tile actor;
 	public Direction direction;
+	public Tile actor;
 
 	// Use this for initialization
 	void Start () {
@@ -17,11 +17,10 @@ public class Instruction : MonoBehaviour {
 	}
 
 	public void SetupWithActorAndDirection (Tile _actor, Direction _direction) {
-		this.actor = _actor;
 		this.direction = _direction;
+		this.actor = _actor;
 
-
-		this.actorRenderer.sprite = this.actor.GetComponentInChildren<SpriteRenderer> ().sprite;
+		this.actorRenderer.sprite = _actor.sprite;
 
 		for (int i = 0; i < this.directionContainers.Length; i++) {
 			this.directionContainers [i].SetActive (false);

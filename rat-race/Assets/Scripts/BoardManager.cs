@@ -26,10 +26,14 @@ public class BoardManager : MonoBehaviour {
 	public Target target;
 	[SerializeField]
 	GameObject instructionArea;
+	[SerializeField]
+	Sprite noCheeseSprite;
+	[SerializeField]
+	Sprite mouseSprite;
 
 	public bool hasCheeseBeenPlaced = false;
 
-	private float unit = 0.32f;
+	private float unit = 0.32f; // make this 28 to do cool tile background thing
 	private List<Slot> slots;
 	private List<Instruction> instructions = new List<Instruction>();
 	private Tile cheese;
@@ -186,6 +190,9 @@ public class BoardManager : MonoBehaviour {
 			i++;
 		}
 		this.StartCoroutine (Reveal ((Tile.animationDuration + delay) * i));
+
+		Animator mouseAnimator = this.mouse.GetComponent<Animator> ();
+		mouseAnimator.SetTrigger ("IdleToMove");
 	}
 
 	private IEnumerator SetMovement(float delay, Tile actor, Direction direction) {
@@ -197,8 +204,16 @@ public class BoardManager : MonoBehaviour {
 
 	private IEnumerator Reveal(float delay) {
 		yield return new WaitForSeconds (delay);
-
-		this.target.ShowView (this.cheese.slot.target != null);
+		bool found = this.cheese.slot.target != null;
+		this.target.ShowView (found);
+		Animator mouseAnimator = this.mouse.GetComponent<Animator> ();
+		if (found) {
+			SpriteRenderer sr = this.cheese.GetComponentInChildren<SpriteRenderer> ();
+			sr.sprite = this.noCheeseSprite;
+			mouseAnimator.SetTrigger ("MoveToWin");
+		} else {
+			mouseAnimator.SetTrigger ("MoveToLose");
+		}
 		this.StartCoroutine (RestartCoroutine ());
 	}
 

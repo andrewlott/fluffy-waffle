@@ -7,6 +7,8 @@ public class Tile : MonoBehaviour {
 	public Slot slot;
 
 	public static float animationDuration = 0.125f;
+
+	public Sprite sprite;
 	private Vector3 startPosition;
 	private float startTime;
 
