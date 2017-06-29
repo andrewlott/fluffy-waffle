@@ -28,8 +28,6 @@ public class BoardManager : MonoBehaviour {
 	GameObject instructionArea;
 	[SerializeField]
 	Sprite noCheeseSprite;
-	[SerializeField]
-	Sprite mouseSprite;
 
 	public bool hasCheeseBeenPlaced = false;
 
