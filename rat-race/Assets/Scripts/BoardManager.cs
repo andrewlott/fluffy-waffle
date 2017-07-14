@@ -11,15 +11,15 @@ public enum Direction {
 
 public class BoardManager : MonoBehaviour {
 	[SerializeField]
-	int boardRadius = 2;
+	int boardRadius;
 	[SerializeField]
 	Slot[] slotPrefabs;
 	[SerializeField]
-	Instruction instructionPrefab;
+	GameObject instructionPrefab;
 	[SerializeField]
 	Tile [] blocks;
 	[SerializeField]
-	Tile mouse;
+	GameObject mousePrefab;
 	[SerializeField]
 	public Tile cheesePrefab;
 	[SerializeField]
@@ -28,13 +28,18 @@ public class BoardManager : MonoBehaviour {
 	GameObject instructionArea;
 	[SerializeField]
 	Sprite noCheeseSprite;
+	[SerializeField]
+	List<GameObject> actorPrefabs;
 
 	public bool hasCheeseBeenPlaced = false;
+	public int level = 1;
 
 	private float unit = 0.32f; // make this 28 to do cool tile background thing
-	private List<Slot> slots;
+	private List<Slot> slots = new List<Slot>();
 	private List<Instruction> instructions = new List<Instruction>();
+	private Tile mouse;
 	private Tile cheese;
+	private List<Actor> actors = new List<Actor>();
 
 	private static BoardManager _instance;
 	public static BoardManager Instance() {
@@ -45,15 +50,30 @@ public class BoardManager : MonoBehaviour {
 	void Start () {
 		_instance = this;
 		// hackyy
+		this.Restart();
+	}
+
+	private void Restart() {
+		Debug.Log ("Restarting");
 
 		this.MakeBoard ();
 		this.MakeTiles ();
 		this.MakeInstructions ();
 	}
 
+	private int BoardRadiusForLevel() {
+		return 1 + ((int)Mathf.Log (this.level));
+	}
+
 	private void MakeBoard() {
-		this.slots = new List<Slot> ();
+		Debug.LogFormat ("Level {0}", this.level);
+		foreach (Slot s in this.slots) {
+			GameObject.Destroy(s.gameObject);
+		}
 		this.slots.Clear ();
+
+		this.boardRadius = this.BoardRadiusForLevel ();
+
 		int total = 0;
 		int totalStart = 0;
 		float offset = unit / 2.0f;			
@@ -82,79 +102,358 @@ public class BoardManager : MonoBehaviour {
 		return slot;
 	}
 
-	public Slot SlotForCoordinate(int x, int y) {
+	public Slot SlotForCoordinate(int x, int y) { // buggy cuz of left right issues
 		return SlotForIndex (x + (boardRadius * 2 * y));
 	}
 
 	public Slot SlotForIndex(int index) {
+		if (index < 0 || index >= this.slots.Count) {
+			return null;
+		}
 		return this.slots [index];
 	}
 
 	private void MakeTiles() {
+		foreach (Actor a in this.actors) {
+			GameObject.Destroy (a.gameObject);
+		}
+		this.actors.Clear ();
+
+		if (this.cheese != null) {
+			GameObject.Destroy (this.cheese.gameObject);
+		}
+		this.hasCheeseBeenPlaced = false;
+		if (this.mouse != null) {
+			GameObject.Destroy (this.mouse.gameObject);
+		}
+		GameObject g = Instantiate (this.mousePrefab) as GameObject;
+		this.mouse = g.GetComponent<Tile> ();
+
 		this.JoinSlotAndTile (this.RandomUnoccupiedSlot (), this.mouse);
 		this.mouse.gameObject.transform.position = this.mouse.slot.gameObject.transform.position;
+
+		Actor mouseActor = this.mouse.GetComponent<Actor> ();
+		this.actors.Add (mouseActor);
+		List<Actor> blockActors = this.GenerateBlocks ();
+		this.actors.AddRange (blockActors);
+	}
+
+	public Slot SlotInDirectionFromSlot(Slot slot, Direction direction) {
+		return this.SlotForIndex (slot.index + this.IndexDeltaForDirection (direction));
+	}
+
+	public Tile TileInDirectionFromTile(Tile tile, Direction direction) {
+		Slot nextSlot = this.SlotInDirectionFromSlot (tile.slot, direction);
+		if (nextSlot == null) {
+			return null;
+		}
+
+		return nextSlot.tile;
 	}
 
 	private void JoinSlotAndTile(Slot slot, Tile tile) {
 		slot.SetTile (tile);
 		tile.SetSlot (slot);
 	}
-
-	private void JoinSlotAndTarget(Slot slot, Target target) {
-		slot.SetTarget (target);
-		target.gameObject.transform.position = slot.gameObject.transform.position;
-	}
-
+		
 	private void UnjoinSlotAndTile(Slot slot, Tile tile) {
 		slot.UnsetTile ();
 		tile.UnsetSlot ();
 	}
+//
+//	private List<Actor> ActorsWithId(int actorId) {
+//		List<Actor> ret = new List<Actor> ();
+//		foreach (Slot s in this.slots) {
+//			if (s.tile != null) {
+//				Actor actor = s.tile.gameObject.GetComponent<Actor> ();
+//				if (actor != null) {
+//					ret.Add (actor);
+//				}
+//			}
+//		}
+//
+//		return ret;
+//	}
+
+	private Vector2 PositionInDirection(int i, int j, Direction direction) {
+		switch (direction) {
+			case Direction.Down:
+				i -= 1;
+				break;
+			case Direction.Left:
+				j -= 1;
+				break;
+			case Direction.Right:
+				j += 1;
+				break;
+			case Direction.Up:
+				i += 1;
+				break;
+		}
+
+		return new Vector2 (i, j);
+	}
+
+	private int ValueInDirection(int [,] boardState, int i, int j, Direction direction) {
+		switch (direction) {
+			case Direction.Down:
+				i -= 1;
+				break;
+			case Direction.Left:
+				j -= 1;
+				break;
+			case Direction.Right:
+				j += 1;
+				break;
+			case Direction.Up:
+				i += 1;
+				break;
+		}
+
+		if (i < 0 || i > boardState.GetLength (0) - 1 || j < 0 || j > boardState.GetLength (1) - 1) {
+			return -1;
+		}
+
+		return boardState [i, j];
+	}
+
+	private void ApplyMove(int [,] boardState, int actorId, Direction direction, List<int> blacklist = null) {
+		if (blacklist == null) {
+			blacklist = new List<int> ();
+		}
+		blacklist.Add (actorId);
+		List<int> influencedActorIds = new List<int> ();
+		List<Vector2> positions = new List<Vector2> ();
+		for (int i = boardState.GetLength (0) - 1; i >= 0; i--) {
+			for (int j = 0; j < boardState.GetLength (1); j++) {
+				int val = boardState [i, j];
+				if (val != actorId) {
+					continue;
+				}
+
+				int valInDirection = this.ValueInDirection (boardState, i, j, direction);
+				if (valInDirection >= 0) {
+					this.PositionInDirection (i, j, direction);
+				}
+
+				if (valInDirection > 0 && !influencedActorIds.Contains (valInDirection) && !blacklist.Contains(valInDirection)) {
+					influencedActorIds.Add (valInDirection);
+				}
+				boardState [i, j] = 0;
+			}
+		}
+
+		foreach (int influencedActorId in influencedActorIds) {
+			this.ApplyMove (boardState, influencedActorId, direction, blacklist);
+		}
+
+		foreach (Vector2 position in positions) {
+			boardState [(int)position.x, (int)position.y] = actorId;
+		}
+	}
+
+	private bool IsLegalMove(int [,] boardState, int actorId, Direction direction, List<int> blacklist = null) {
+		if (blacklist == null) {
+			blacklist = new List<int> ();
+		}
+		blacklist.Add (actorId);
+		bool ret = true;
+		List<int> influencedActorIds = new List<int> ();
+		for (int i = boardState.GetLength (0) - 1; i >= 0; i--) {
+			for (int j = 0; j < boardState.GetLength (1); j++) {
+				int val = boardState [i, j];
+				if (val != actorId) {
+					continue;
+				}
+
+				int valInDirection = this.ValueInDirection (boardState, i, j, direction);
+				if (valInDirection < 0) {
+					return false;
+				}
+
+				if (valInDirection > 0 && !influencedActorIds.Contains (valInDirection) && !blacklist.Contains(valInDirection)) {
+					influencedActorIds.Add (valInDirection);
+				}
+			}
+		}
+
+		foreach (int influencedActorId in influencedActorIds) {
+			ret = ret && this.IsLegalMove (boardState, influencedActorId, direction, blacklist);
+		}
+
+		return ret;
+//		bool ret = true;
+//		List<int> influencedActorIds = new List<int> ();
+//		foreach (Actor actor in actors) {
+//			Tile t = actor.gameObject.GetComponent<Tile> ();
+//			Slot moveToSlot = this.SlotInDirectionFromSlot (t.slot, direction);
+//			if (moveToSlot == null) {
+//				return false;
+//			}
+//
+//			Tile neighbor = this.TileInDirectionFromTile (t, direction);
+//			if (neighbor != null) {
+//				Actor neighborActor = neighbor.gameObject.GetComponent<Actor> ();
+//				if (!influencedActorIds.Contains (neighborActor.myActorId)) {
+//					influencedActorIds.Add (neighborActor.myActorId);
+//				}
+//			}
+//		}
+//
+//		foreach (int influencedActorId in influencedActorIds) {
+//			ret = ret && this.IsLegalMove (boardState, influencedActorId, direction);
+//		}
+//
+//		return ret;
+	}
+
+	private List<int> ActorIds() {
+		List<int> actorIds = new List<int> ();
+		foreach (Actor actor in this.actors) {
+			if (!actorIds.Contains (actor.myActorId)) {
+				actorIds.Add (actor.myActorId);
+			}
+		}
+		return actorIds;
+	}
+
+	private List<Actor> ActorsWithId(int actorId) {
+		List<Actor> a = new List<Actor> ();
+		foreach (Actor actor in this.actors) {
+			if (actor.myActorId == actorId) {
+				a.Add (actor);
+			}
+		}
+		return a;
+	}
+
+	private List<InstructionSet> AllValidNextInstructions(int [,] boardState) {
+		List<InstructionSet> allInstructions = new List<InstructionSet> ();
+		Direction[] directions = new Direction[]{ Direction.Down, Direction.Left, Direction.Right, Direction.Up };
+		// attempt each next instruction
+		foreach (int actorId in this.ActorIds()) {
+			foreach (Direction direction in directions) {
+				if (this.IsLegalMove (boardState, actorId, direction)) {
+					allInstructions.Add (new InstructionSet {
+						actorId = actorId,
+						direction = direction
+					});
+				}
+			}
+		}
+
+
+		return allInstructions;
+	}
+
+	private InstructionSet RandomValidNextInstruction(int [,] boardstate) {
+		List<InstructionSet> allValidNextInstructions = this.AllValidNextInstructions (boardstate);
+		if (allValidNextInstructions == null || allValidNextInstructions.Count == 0) {
+			return null;
+		}
+
+		allValidNextInstructions.Shuffle ();
+		return allValidNextInstructions[0];
+	}
+		
+	private void PrintBoardState(int [,] boardState) {
+		string ss = "";
+		for (int i = boardState.GetLength(0) - 1; i >= 0; i--) {
+			for (int j = 0; j < boardState.GetLength(1); j++) {
+				ss += " " + boardState[i,j] + " ";
+			}
+			ss += "\n";
+		}
+		Debug.Log(ss);
+	}
+
+	private int [,] GetBoardState() {
+		int boardWidth = 2 * boardRadius;
+
+		int[,] boardState = new int[boardWidth, boardWidth];
+		foreach (Slot s in this.slots) {
+			int sx = s.x;
+			int sy = s.y;
+			if (s.tile != null) {
+				Actor a = s.tile.gameObject.GetComponent<Actor> ();
+				boardState [sy, sx] = a.myActorId;
+			}
+		}
+
+		return boardState;
+	}
 
 	private void MakeInstructions() {
+		this.instructions.Clear ();
+		foreach (Transform child in this.instructionArea.transform) {
+			GameObject.Destroy(child.gameObject);
+		}
+
 		int x = this.mouse.slot.x;
 		int y = this.mouse.slot.y;
 
-		this.instructions.Clear ();
+		int randomAmount = Random.Range (level, 2 * level);
 
-		int randomAmount = Random.Range (boardRadius, 2 * boardRadius);
+		int[,] boardState = this.GetBoardState ();
+		Debug.Log (randomAmount);
+		this.PrintBoardState (boardState);
 		while (this.instructions.Count < randomAmount) {
-			Direction randomDirection = (Direction)Random.Range (0, 4);
-			switch (randomDirection) {
-			case Direction.Up:
-				if (y == boardRadius * 2 - 1) {
-					continue;
-				}
-				y++;
-				break;
-			case Direction.Down:
-				if (y == 0) {
-					continue;
-				}
-				y--;
-				break;
-			case Direction.Left:
-				if (x == 0) {
-					continue;
-				}
-				x--;
-				break;
-			case Direction.Right:
-				if (x == boardRadius * 2 - 1) {
-					continue;
-				}
-				x++;
-				break;
-			default:
-				break;
+			InstructionSet instructionSet = this.RandomValidNextInstruction (boardState);
+			if (instructionSet == null) {
+				this.instructions.RemoveAt (this.instructions.Count - 1);
+				continue;
 			}
 
-			Instruction instruction = Instantiate (this.instructionPrefab);
-			instruction.SetupWithActorAndDirection (this.mouse, randomDirection);
+			GameObject g = Instantiate (this.instructionPrefab) as GameObject;
+			Instruction instruction = g.GetComponent<Instruction>();
+			instruction.SetupWithInstructionSet (instructionSet);
 			instruction.gameObject.transform.SetParent (this.instructionArea.gameObject.transform, false);
 
 			this.instructions.Add (instruction);
+
+			this.ApplyMove (boardState, instructionSet.actorId, instructionSet.direction);
+			this.PrintBoardState (boardState);
 		}
-		this.JoinSlotAndTarget (this.SlotForCoordinate (x, y), this.target);
+//			
+//		int randomAmount = Random.Range (boardRadius, 2 * boardRadius);
+//		while (this.instructions.Count < randomAmount) {
+//			Direction randomDirection = (Direction)Random.Range (0, 4);
+//			switch (randomDirection) {
+//			case Direction.Up:
+//				if (y == boardRadius * 2 - 1) {
+//					continue;
+//				}
+//				y++;
+//				break;
+//			case Direction.Down:
+//				if (y == 0) {
+//					continue;
+//				}
+//				y--;
+//				break;
+//			case Direction.Left:
+//				if (x == 0) {
+//					continue;
+//				}
+//				x--;
+//				break;
+//			case Direction.Right:
+//				if (x == boardRadius * 2 - 1) {
+//					continue;
+//				}
+//				x++;
+//				break;
+//			default:
+//				break;
+//			}
+//
+//			Actor actor = this.mouse.GetComponent<Actor> ();
+//			Instruction instruction = Instantiate (this.instructionPrefab);
+//			instruction.SetupWithActorAndDirection (actor.myActorId, randomDirection);
+//			instruction.gameObject.transform.SetParent (this.instructionArea.gameObject.transform, false);
+//
+//			this.instructions.Add (instruction);
+//		}
 	}
 
 	private int IndexDeltaForDirection(Direction direction) {
@@ -172,7 +471,7 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
-	public void CheesePlaced(Slot cheeseSlot) {
+	public void CheesePlaced(Slot cheeseSlot) { // sometimes guy teleports so need actual system for moving actors
 		this.hasCheeseBeenPlaced = true;
 		this.cheese = Instantiate (BoardManager.Instance().cheesePrefab).GetComponentInChildren<Tile>();
 		this.cheese.gameObject.transform.position = cheeseSlot.transform.position;
@@ -180,10 +479,10 @@ public class BoardManager : MonoBehaviour {
 		
 		List<Instruction>.Enumerator e = this.instructions.GetEnumerator ();
 		int i = 0;
-		float delay = Tile.animationDuration / 2.0f;
+		float delay = Tile.animationDuration;
 		while (e.MoveNext ()) {
 			Instruction instruction = e.Current;
-			this.StartCoroutine (this.SetMovement ((Tile.animationDuration + delay) * i , instruction.actor, instruction.direction));
+			this.StartCoroutine (this.SetMovement ((Tile.animationDuration + delay) * i , instruction.instructionSet.actorId, instruction.instructionSet.direction));
 
 			i++;
 		}
@@ -193,35 +492,190 @@ public class BoardManager : MonoBehaviour {
 		mouseAnimator.SetTrigger ("IdleToMove");
 	}
 
-	private IEnumerator SetMovement(float delay, Tile actor, Direction direction) {
+	private IEnumerator SetMovement(float delay, int actorId, Direction direction) {
 		yield return new WaitForSeconds (delay);
+		Actor.TriggerMove (actorId, direction);
+	}
 
+	public void MoveTileInDirection(Tile actor, Direction direction) {
 		Slot nextSlot = this.SlotForIndex (actor.slot.index + this.IndexDeltaForDirection (direction));
+		this.UnjoinSlotAndTile (actor.slot, actor);
 		this.JoinSlotAndTile (nextSlot, actor);
 	}
 
 	private IEnumerator Reveal(float delay) {
 		yield return new WaitForSeconds (delay);
-		bool found = this.cheese.slot.target != null;
-		this.target.ShowView (found);
+		bool found = this.cheese.slot == this.mouse.slot;
+//		this.target.ShowView (found);
 		Animator mouseAnimator = this.mouse.GetComponent<Animator> ();
 		if (found) {
 			SpriteRenderer sr = this.cheese.GetComponentInChildren<SpriteRenderer> ();
 			sr.sprite = this.noCheeseSprite;
 			mouseAnimator.SetTrigger ("MoveToWin");
+			this.level++;
 		} else {
 			mouseAnimator.SetTrigger ("MoveToLose");
 		}
 		this.StartCoroutine (RestartCoroutine ());
 	}
 
+	public Sprite SpriteForActorId(int actorId) {
+		GameObject g = this.actorPrefabs[actorId - 1]; //FFFF
+		if (g == null) {
+			return null;
+		}
+
+		Tile tile = g.GetComponent<Tile> ();
+		return tile.sprite;
+	}
+
 	private IEnumerator RestartCoroutine() {
 		yield return new WaitForSeconds (1.5f);
-		Application.LoadLevel("Main");
+		this.Restart ();
+		//Application.LoadLevel("Main");
 	}
 	
 	// Update is called once per frame
 	void Update () {
 	
+	}
+
+	private List<Actor> GenerateBlocks() {
+		List<Actor> blockActors = new List<Actor> ();
+		foreach (int blockId in Actor.blockIds) {
+			GameObject prefab = this.actorPrefabs [blockId - 1];
+			Actor actor = prefab.GetComponent<Actor> ();
+			if (actor.minLevel > this.level) {
+				continue;
+			}
+
+			blockActors.Add (actor);
+
+			// choose random params
+			int numPieces = Random.Range(actor.avgPieces - actor.avgPieceDeviation, actor.avgPieces + actor.avgPieceDeviation + 1);
+			int mouseProximity = Random.Range (actor.avgMouseProximity - actor.avgMouseDeviation, actor.avgMouseProximity + actor.avgMouseDeviation + 1);
+
+			// generate prefab at locations and attach to slots
+			Slot initialSlot = this.mouse.slot;
+			int distance = mouseProximity;
+			List<Tile> block = new List<Tile> ();
+			for (int i = 0; i < numPieces; i++) {
+				Slot slot = this.RandomEmptySlotNearSlot (initialSlot, distance);
+				if (slot == null) {
+					break;
+				}
+				GameObject g = Instantiate (prefab) as GameObject;
+				Tile tile = g.GetComponent<Tile> ();
+				this.JoinSlotAndTile (slot, tile);
+				tile.gameObject.transform.position = tile.slot.gameObject.transform.position;
+				block.Add (tile);
+
+				Actor a = g.GetComponent<Actor> ();
+				blockActors.Add (a);
+
+				distance = 1;
+
+				List<Tile> selectableTiles = new List<Tile> (block);
+				bool found = false;
+				while (selectableTiles.Count > 0 && !found) {
+					int randomIndex = Random.Range (0, selectableTiles.Count);
+					Tile t = selectableTiles [randomIndex];
+					if (this.NumberOfUnoccupiedNeighbors (t.slot) > 0) {
+						found = true;
+						initialSlot = t.slot;
+					} else {
+						selectableTiles.RemoveAt (randomIndex);
+					}
+				}
+
+				if (!found) {
+					break;
+				}
+			}
+		}
+
+		return blockActors;
+	}
+
+	public int NumberOfUnoccupiedNeighbors(Slot slot) {
+		int total = 0;
+		Slot s = this.SlotForCoordinate (slot.x + 1, slot.y);
+		if (s != null && s.tile == null) {
+			total++;
+		}
+		s = this.SlotForCoordinate (slot.x - 1, slot.y);
+		if (s != null && s.tile == null) {
+			total++;
+		}
+
+		s = this.SlotForCoordinate (slot.x, slot.y + 1);
+		if (s != null && s.tile == null) {
+			total++;
+		}
+
+		s = this.SlotForCoordinate (slot.x, slot.y - 1);
+		if (s != null && s.tile == null) {
+			total++;
+		}
+
+		return total;
+	}
+
+	public Slot RandomEmptySlotNearSlot(Slot startSlot, int distance) {
+		List<Slot> blacklist = new List<Slot> ();
+		Slot ret = null;
+		int attempts = 0;
+		int maxAttempts = 100;
+		while ((ret == null || blacklist.Contains (ret)) && attempts < maxAttempts) {
+			int x = startSlot.x;
+			int y = startSlot.y;
+			int moves = 0;
+
+			while (moves < distance) {
+				Direction randomDirection = (Direction)Random.Range (0, 4);
+				switch (randomDirection) {
+				case Direction.Up:
+					if (y == boardRadius * 2 - 1) {
+						continue;
+					}
+					y++;
+					break;
+				case Direction.Down:
+					if (y == 0) {
+						continue;
+					}
+					y--;
+					break;
+				case Direction.Left:
+					if (x == 0) {
+						continue;
+					}
+					x--;
+					break;
+				case Direction.Right:
+					if (x == boardRadius * 2 - 1) {
+						continue;
+					}
+					x++;
+					break;
+				default:
+					break;
+				}
+
+				moves++;
+			}
+
+			ret = this.SlotForCoordinate (x, y);
+			if (ret.tile != null) {
+				blacklist.Add (ret);
+				attempts++;
+			}
+		}
+
+		if (attempts >= maxAttempts) {
+			return null;
+		}
+
+		return ret;
 	}
 }

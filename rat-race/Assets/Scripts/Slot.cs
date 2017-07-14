@@ -6,7 +6,6 @@ public class Slot : MonoBehaviour {
 	public int x, y, index;
 
 	public Tile tile;
-	public Target target;
 
 	public void SetTile(Tile _tile) {
 		this.tile = _tile;
@@ -14,10 +13,6 @@ public class Slot : MonoBehaviour {
 
 	public void UnsetTile() {
 		this.tile = null;
-	}
-
-	public void SetTarget(Target _target) {
-		this.target = _target;
 	}
 
 	// Use this for initialization

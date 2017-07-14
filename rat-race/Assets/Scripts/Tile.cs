@@ -27,6 +27,9 @@ public class Tile : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (!BoardManager.Instance ().hasCheeseBeenPlaced) {
+			return;
+		}
 		if (this.slot == null) {
 			return;
 		}

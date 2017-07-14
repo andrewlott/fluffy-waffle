@@ -15,3 +15,8 @@
 /Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/Unity.CecilTools.dll
 /Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/Mono.Cecil.Pdb.dll
 /Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/Mono.Cecil.Mdb.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.TestRunner.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/nunit.framework.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.Analytics.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.HoloLens.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.VR.dll

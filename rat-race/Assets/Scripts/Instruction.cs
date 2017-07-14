@@ -1,31 +1,40 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Instruction : MonoBehaviour {
+public class InstructionSet {
+	public Direction direction;
+	public int actorId;
+}
 
+public class Instruction : MonoBehaviour {
 	[SerializeField]
 	SpriteRenderer actorRenderer;
 	[SerializeField]
 	GameObject[] directionContainers;
 
-	public Direction direction;
-	public Tile actor;
-
+	public InstructionSet instructionSet;
 	// Use this for initialization
 	void Start () {
 	
 	}
 
-	public void SetupWithActorAndDirection (Tile _actor, Direction _direction) {
-		this.direction = _direction;
-		this.actor = _actor;
+	public void SetupWithActorAndDirection (int _actorId, Direction _direction) {
+		InstructionSet _instructionSet = new InstructionSet {
+			direction = _direction, 
+			actorId = _actorId
+		};
 
-		this.actorRenderer.sprite = _actor.sprite;
+		this.SetupWithInstructionSet (_instructionSet);
+	}
+
+	public void SetupWithInstructionSet (InstructionSet _instructionSet) {
+		this.instructionSet = _instructionSet;
+		this.actorRenderer.sprite = BoardManager.Instance().SpriteForActorId (this.instructionSet.actorId);
 
 		for (int i = 0; i < this.directionContainers.Length; i++) {
 			this.directionContainers [i].SetActive (false);
 		}
-		switch (this.direction) {
+		switch (this.instructionSet.direction) {
 		case Direction.Up:
 			this.directionContainers [0].SetActive (true);
 			break;
@@ -42,7 +51,7 @@ public class Instruction : MonoBehaviour {
 			break;
 		}
 	}
-	
+		
 	// Update is called once per frame
 	void Update () {
 		
