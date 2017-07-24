@@ -102,7 +102,7 @@ public class BoardManager : MonoBehaviour {
 		return slot;
 	}
 
-	public Slot SlotForCoordinate(int x, int y) { // buggy cuz of left right issues
+	public Slot SlotForCoordinate(int x, int y) {
 		return SlotForIndex (x + (boardRadius * 2 * y));
 	}
 
@@ -139,7 +139,38 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	public Slot SlotInDirectionFromSlot(Slot slot, Direction direction) {
+		if (!this.IsValidDirectionFromSlot(slot, direction)) {
+			return null;
+		}
 		return this.SlotForIndex (slot.index + this.IndexDeltaForDirection (direction));
+	}
+
+	public bool IsValidDirectionFromSlot(Slot slot, Direction direction) {
+		switch (direction) {
+		case Direction.Down:
+			return slot.index + this.IndexDeltaForDirection(direction) >= 0;
+		case Direction.Left:
+			{
+				int originalRow = this.RowForSlotIndex(slot.index);
+				return originalRow == this.RowForSlotIndex(slot.index + this.IndexDeltaForDirection(direction));
+			}
+		case Direction.Right:
+			{
+				int originalRow = this.RowForSlotIndex(slot.index);
+				return originalRow == this.RowForSlotIndex(slot.index + this.IndexDeltaForDirection(direction));
+			}
+		case Direction.Up:
+			return slot.index + this.IndexDeltaForDirection(direction) < this.slots.Count;
+		}
+		return false;
+	}
+
+	public int RowForSlotIndex(int index) {
+		return index / (boardRadius * 2);
+	}
+
+	public int ColumnForSlotIndex(int index) {
+		return index % (boardRadius * 2);
 	}
 
 	public Tile TileInDirectionFromTile(Tile tile, Direction direction) {
@@ -233,7 +264,7 @@ public class BoardManager : MonoBehaviour {
 
 				int valInDirection = this.ValueInDirection (boardState, i, j, direction);
 				if (valInDirection >= 0) {
-					this.PositionInDirection (i, j, direction);
+					positions.Add(this.PositionInDirection(i, j, direction));
 				}
 
 				if (valInDirection > 0 && !influencedActorIds.Contains (valInDirection) && !blacklist.Contains(valInDirection)) {
@@ -599,21 +630,21 @@ public class BoardManager : MonoBehaviour {
 
 	public int NumberOfUnoccupiedNeighbors(Slot slot) {
 		int total = 0;
-		Slot s = this.SlotForCoordinate (slot.x + 1, slot.y);
+		Slot s = this.SlotInDirectionFromSlot(slot, Direction.Up);
 		if (s != null && s.tile == null) {
 			total++;
 		}
-		s = this.SlotForCoordinate (slot.x - 1, slot.y);
-		if (s != null && s.tile == null) {
-			total++;
-		}
-
-		s = this.SlotForCoordinate (slot.x, slot.y + 1);
+		s = this.SlotInDirectionFromSlot(slot, Direction.Down);
 		if (s != null && s.tile == null) {
 			total++;
 		}
 
-		s = this.SlotForCoordinate (slot.x, slot.y - 1);
+		s = this.SlotInDirectionFromSlot(slot, Direction.Left);
+		if (s != null && s.tile == null) {
+			total++;
+		}
+
+		s = this.SlotInDirectionFromSlot(slot, Direction.Right);
 		if (s != null && s.tile == null) {
 			total++;
 		}
