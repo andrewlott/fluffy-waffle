@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -30,9 +31,27 @@ public class BoardManager : MonoBehaviour {
 	Sprite noCheeseSprite;
 	[SerializeField]
 	List<GameObject> actorPrefabs;
+	[SerializeField]
+	int initialTimeInSeconds = 60;
+	[SerializeField]
+	int bonusTimeInSeconds = 5;
+	[SerializeField]
+	int initialLives = 3;
+	[SerializeField]
+	Sprite lifeLoseSprite;
+
+	[SerializeField]
+	Text levelText;
+	[SerializeField]
+	Text timerText;
+	[SerializeField]
+	List<Image> mouseLivesImages;
 
 	public bool hasCheeseBeenPlaced = false;
-	public int level = 1;
+	private int level = 1;
+	private float startTime;
+	private int bonusTime;
+	private int lives;
 
 	private float unit = 0.32f; // make this 28 to do cool tile background thing
 	private List<Slot> slots = new List<Slot>();
@@ -50,11 +69,22 @@ public class BoardManager : MonoBehaviour {
 	void Start () {
 		_instance = this;
 		// hackyy
+		this.Initialize();
 		this.Restart();
+	}
+
+	void Update() {
+		this.UpdateTimerText();
+	}
+
+	private void Initialize() {
+		this.startTime = Time.time;
+		this.lives = this.initialLives;
 	}
 
 	private void Restart() {
 		Debug.Log ("Restarting");
+		this.UpdateLevelText();
 
 		this.MakeBoard ();
 		this.MakeTiles ();
@@ -544,8 +574,11 @@ public class BoardManager : MonoBehaviour {
 			sr.sprite = this.noCheeseSprite;
 			mouseAnimator.SetTrigger ("MoveToWin");
 			this.level++;
+			this.bonusTime += this.bonusTimeInSeconds;
 		} else {
 			mouseAnimator.SetTrigger ("MoveToLose");
+			this.lives--;
+			this.UpdateLives();
 		}
 		this.StartCoroutine (RestartCoroutine ());
 	}
@@ -564,11 +597,6 @@ public class BoardManager : MonoBehaviour {
 		yield return new WaitForSeconds (1.5f);
 		this.Restart ();
 		//Application.LoadLevel("Main");
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
 	}
 
 	private List<Actor> GenerateBlocks() {
@@ -709,4 +737,39 @@ public class BoardManager : MonoBehaviour {
 
 		return ret;
 	}
+
+
+	#region - UI
+
+	public void UpdateLevelText() {
+		this.levelText.text = string.Format("Level {0}", this.level);
+	}
+
+	public void UpdateTimerText() {
+		int seconds = this.RemainingTimeDisplay();
+		System.TimeSpan timeSpan = System.TimeSpan.FromSeconds(seconds);
+		string timeText = string.Format("{0:D2}:{1:D2}", timeSpan.Minutes, timeSpan.Seconds);
+		this.timerText.text = timeText;
+	}
+
+	public int RemainingTimeDisplay() {
+		return Mathf.RoundToInt(this.RemainingTime());
+	}
+
+	public float RemainingTime() {
+		return this.startTime - Time.time + this.initialTimeInSeconds + this.bonusTime;
+	}
+
+	public void UpdateLives() {
+		for (int i = 0; i < this.initialLives - this.lives; i++) {
+			this.mouseLivesImages[i].sprite = this.lifeLoseSprite;
+		}
+	}
+
+	public void BackButtonPressed() {
+		// to do: show prompt
+		Application.LoadLevel("SplashScreen");
+	}
+
+	#endregion
 }
