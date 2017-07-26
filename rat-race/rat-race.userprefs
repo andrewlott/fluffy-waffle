@@ -1,15 +1,17 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/BoardManager.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/SplashScreenManager.cs">
     <Files>
-      <File FileName="Assets/Scripts/BoardManager.cs" Line="277" Column="1" />
-      <File FileName="Assets/Scripts/Tile.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Slot.cs" Line="16" Column="3" />
-      <File FileName="Assets/Scripts/Instruction.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/BoardManager.cs" Line="568" Column="3" />
+      <File FileName="Assets/Scripts/SplashScreenManager.cs" Line="13" Column="3" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/Users/andrewlott/Projects/fluffy-waffle/rat-race/Assets/Scripts/BoardManager.cs" line="464" column="25" />
+      <Breakpoint file="/Users/andrewlott/Projects/fluffy-waffle/rat-race/Assets/Scripts/BoardManager.cs" line="312" column="1" />
+      <Breakpoint file="/Users/andrewlott/Projects/fluffy-waffle/rat-race/Assets/Scripts/BoardManager.cs" line="311" column="1" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
 </Properties>
