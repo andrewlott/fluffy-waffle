@@ -10,13 +10,19 @@ public class SplashScreenManager : MonoBehaviour {
 
 	void Start () {
 		int highScore = PlayerPrefs.GetInt("highScore");
-		slider.value = PlayerPrefs.GetInt("difficulty") != 0 ? (int)PlayerPrefs.GetInt("difficulty") : 1;
 		if (highScore > 0) {
 			this.highScoreText.text = string.Format("Highest Level: {0}", highScore);
 			slider.maxValue = (float)highScore;
 		} else {
 			this.highScoreText.text = "";
 		}
+
+		if (PlayerPrefs.GetInt("difficulty") == 0) {
+			PlayerPrefs.SetInt("difficulty", 1);
+		}
+		int difficulty = PlayerPrefs.GetInt("difficulty");
+		slider.value = (float)difficulty;
+
 		this.UpdateDifficultyText();
 	}
 

@@ -11,9 +11,6 @@ public class Actor : MonoBehaviour {
 	public int avgMouseProximity = 0;
 	public int avgMouseDeviation = 0;
 
-	// add spawning parameters like min level, avg connected pieces, deviation, spawn proximity to mouse
-	// add 
-
 	public static readonly int mouseId = 1;
 	public static readonly List<int> blockIds = new List<int> {2, 3};
 
@@ -65,6 +62,6 @@ public class Actor : MonoBehaviour {
 			}
 		}
 
-		BoardManager.Instance ().MoveTileInDirection (tile, direction);
+		BoardManager.Instance ().MoveTileInDirection (tile, direction, this.myActorId);
 	}
 }

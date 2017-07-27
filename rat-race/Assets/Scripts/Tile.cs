@@ -7,8 +7,10 @@ public class Tile : MonoBehaviour {
 	public Slot slot;
 
 	public static float animationDuration = 0.125f;
-
 	public Sprite sprite;
+	public Sprite backgroundSprite;
+
+	public Colorable colorable;
 	private Vector3 startPosition;
 	private float startTime;
 
@@ -22,7 +24,7 @@ public class Tile : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+		
 	}
 	
 	// Update is called once per frame
@@ -42,6 +44,11 @@ public class Tile : MonoBehaviour {
 		} else if (this.startTime != 0) {
 			this.startTime = 0;
 			this.startPosition = Vector3.zero;
+			Actor actor = this.gameObject.GetComponent<Actor>();
+			if (actor.myActorId == Actor.mouseId) {
+				Animator animator = this.gameObject.GetComponent<Animator>();
+				animator.SetTrigger("MouseIdle"); // can alleviate extra frame when moving a lot by delegating all instructions to actors (pass them index to determine delay and instruction)
+			}
 		}
 	}
 }

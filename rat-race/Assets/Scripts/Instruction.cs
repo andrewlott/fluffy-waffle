@@ -10,6 +10,8 @@ public class Instruction : MonoBehaviour {
 	[SerializeField]
 	SpriteRenderer actorRenderer;
 	[SerializeField]
+	SpriteRenderer actorBackgroundRenderer;
+	[SerializeField]
 	GameObject[] directionContainers;
 
 	public InstructionSet instructionSet;
@@ -30,6 +32,11 @@ public class Instruction : MonoBehaviour {
 	public void SetupWithInstructionSet (InstructionSet _instructionSet) {
 		this.instructionSet = _instructionSet;
 		this.actorRenderer.sprite = BoardManager.Instance().SpriteForActorId (this.instructionSet.actorId);
+		this.actorBackgroundRenderer.sprite = BoardManager.Instance().BackgroundSpriteForActorId(this.instructionSet.actorId);
+		Colorable colorable = BoardManager.Instance().ColorableForActorId(this.instructionSet.actorId);
+		if (colorable != null && this.actorBackgroundRenderer != null && this.actorBackgroundRenderer.sprite != null) {
+			this.actorBackgroundRenderer.color = colorable.GetSelectedColor();
+		}
 
 		for (int i = 0; i < this.directionContainers.Length; i++) {
 			this.directionContainers [i].SetActive (false);

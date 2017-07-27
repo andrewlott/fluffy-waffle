@@ -28,8 +28,6 @@ public class BoardManager : MonoBehaviour {
 	[SerializeField]
 	GameObject instructionArea;
 	[SerializeField]
-	Sprite noCheeseSprite;
-	[SerializeField]
 	List<GameObject> actorPrefabs;
 	[SerializeField]
 	int initialTimeInSeconds = 60;
@@ -39,6 +37,8 @@ public class BoardManager : MonoBehaviour {
 	int initialLives = 3;
 	[SerializeField]
 	Sprite lifeLoseSprite;
+	[SerializeField]
+	Sprite lifeLoseBackground;
 
 	[SerializeField]
 	Text levelText;
@@ -46,14 +46,17 @@ public class BoardManager : MonoBehaviour {
 	Text timerText;
 	[SerializeField]
 	List<Image> mouseLivesImages;
+	[SerializeField]
+	List<Image> mouseLivesBackgrounds;
 
 	public bool hasCheeseBeenPlaced = false;
+	private bool hasLost = false;
 	private int level = 1;
 	private float startTime;
 	private int bonusTime;
 	private int lives;
 
-	private float unit = 0.32f; // make this 28 to do cool tile background thing
+	private float unit = 0.28f; // gus needs to fix tile sizes to fit
 	private List<Slot> slots = new List<Slot>();
 	private List<Instruction> instructions = new List<Instruction>();
 	private Tile mouse;
@@ -74,12 +77,31 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	void Update() {
-		this.UpdateTimerText();
+		if (!this.hasLost) {
+			this.UpdateTimerText();
+			this.CheckLoss();
+		}
+	}
+
+	private void CheckLoss() {
+		if (this.lives <= 0 || this.RemainingTime() <= 0) {
+			this.hasLost = true;
+
+			int highScore = PlayerPrefs.GetInt("highScore");
+			if (this.level > highScore) {
+				PlayerPrefs.SetInt("highScore", this.level);
+				Debug.LogFormat("New high score: {0}", this.level);
+			} else {
+				Debug.LogFormat("Score: {0}", this.level);
+			}
+		}
 	}
 
 	private void Initialize() {
 		this.startTime = Time.time;
 		this.lives = this.initialLives;
+		int difficulty = PlayerPrefs.GetInt("difficulty");
+		this.level = difficulty > this.level ? difficulty : this.level;
 	}
 
 	private void Restart() {
@@ -89,6 +111,7 @@ public class BoardManager : MonoBehaviour {
 		this.MakeBoard ();
 		this.MakeTiles ();
 		this.MakeInstructions ();
+		this.UpdateLives();
 	}
 
 	private int BoardRadiusForLevel() {
@@ -164,7 +187,7 @@ public class BoardManager : MonoBehaviour {
 
 		Actor mouseActor = this.mouse.GetComponent<Actor> ();
 		this.actors.Add (mouseActor);
-		List<Actor> blockActors = this.GenerateBlocks ();
+		List<Actor> blockActors = this.GenerateObstacles ();
 		this.actors.AddRange (blockActors);
 	}
 
@@ -450,9 +473,6 @@ public class BoardManager : MonoBehaviour {
 			GameObject.Destroy(child.gameObject);
 		}
 
-		int x = this.mouse.slot.x;
-		int y = this.mouse.slot.y;
-
 		int randomAmount = Random.Range (level, 2 * level);
 
 		int[,] boardState = this.GetBoardState ();
@@ -475,46 +495,6 @@ public class BoardManager : MonoBehaviour {
 			this.ApplyMove (boardState, instructionSet.actorId, instructionSet.direction);
 			this.PrintBoardState (boardState);
 		}
-//			
-//		int randomAmount = Random.Range (boardRadius, 2 * boardRadius);
-//		while (this.instructions.Count < randomAmount) {
-//			Direction randomDirection = (Direction)Random.Range (0, 4);
-//			switch (randomDirection) {
-//			case Direction.Up:
-//				if (y == boardRadius * 2 - 1) {
-//					continue;
-//				}
-//				y++;
-//				break;
-//			case Direction.Down:
-//				if (y == 0) {
-//					continue;
-//				}
-//				y--;
-//				break;
-//			case Direction.Left:
-//				if (x == 0) {
-//					continue;
-//				}
-//				x--;
-//				break;
-//			case Direction.Right:
-//				if (x == boardRadius * 2 - 1) {
-//					continue;
-//				}
-//				x++;
-//				break;
-//			default:
-//				break;
-//			}
-//
-//			Actor actor = this.mouse.GetComponent<Actor> ();
-//			Instruction instruction = Instantiate (this.instructionPrefab);
-//			instruction.SetupWithActorAndDirection (actor.myActorId, randomDirection);
-//			instruction.gameObject.transform.SetParent (this.instructionArea.gameObject.transform, false);
-//
-//			this.instructions.Add (instruction);
-//		}
 	}
 
 	private int IndexDeltaForDirection(Direction direction) {
@@ -532,7 +512,7 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
-	public void CheesePlaced(Slot cheeseSlot) { // sometimes guy teleports so need actual system for moving actors
+	public void CheesePlaced(Slot cheeseSlot) {
 		this.hasCheeseBeenPlaced = true;
 		this.cheese = Instantiate (BoardManager.Instance().cheesePrefab).GetComponentInChildren<Tile>();
 		this.cheese.gameObject.transform.position = cheeseSlot.transform.position;
@@ -548,9 +528,6 @@ public class BoardManager : MonoBehaviour {
 			i++;
 		}
 		this.StartCoroutine (Reveal ((Tile.animationDuration + delay) * i));
-
-		Animator mouseAnimator = this.mouse.GetComponent<Animator> ();
-		mouseAnimator.SetTrigger ("IdleToMove");
 	}
 
 	private IEnumerator SetMovement(float delay, int actorId, Direction direction) {
@@ -558,25 +535,45 @@ public class BoardManager : MonoBehaviour {
 		Actor.TriggerMove (actorId, direction);
 	}
 
-	public void MoveTileInDirection(Tile actor, Direction direction) {
+	public void MoveTileInDirection(Tile actor, Direction direction, int actorId) {
 		Slot nextSlot = this.SlotForIndex (actor.slot.index + this.IndexDeltaForDirection (direction));
 		this.UnjoinSlotAndTile (actor.slot, actor);
 		this.JoinSlotAndTile (nextSlot, actor);
+		if (actorId == Actor.mouseId) {
+			this.PlayMouseAnimationInDirection(direction);
+		}
+	}
+
+	public void PlayMouseAnimationInDirection(Direction direction) {
+		Animator mouseAnimator = this.mouse.GetComponent<Animator> ();
+		switch (direction) {
+		case Direction.Down:
+			mouseAnimator.SetTrigger("MouseMoveUp"); // tell gus to fix this
+			break;
+		case Direction.Left:
+			mouseAnimator.SetTrigger("MouseMoveLeft");
+			break;
+		case Direction.Right:
+			mouseAnimator.SetTrigger("MouseMoveRight");
+			break;
+		case Direction.Up:
+			mouseAnimator.SetTrigger("MouseMoveDown");
+			break;
+		}
 	}
 
 	private IEnumerator Reveal(float delay) {
 		yield return new WaitForSeconds (delay);
 		bool found = this.cheese.slot == this.mouse.slot;
-//		this.target.ShowView (found);
 		Animator mouseAnimator = this.mouse.GetComponent<Animator> ();
 		if (found) {
-			SpriteRenderer sr = this.cheese.GetComponentInChildren<SpriteRenderer> ();
-			sr.sprite = this.noCheeseSprite;
-			mouseAnimator.SetTrigger ("MoveToWin");
+			Animator cheeseAnimator = this.cheese.GetComponentInChildren<Animator> ();
+			cheeseAnimator.SetTrigger("CheeseWin");
+			mouseAnimator.SetTrigger ("MouseWin");
 			this.level++;
 			this.bonusTime += this.bonusTimeInSeconds;
 		} else {
-			mouseAnimator.SetTrigger ("MoveToLose");
+			mouseAnimator.SetTrigger ("MouseLose");
 			this.lives--;
 			this.UpdateLives();
 		}
@@ -593,13 +590,38 @@ public class BoardManager : MonoBehaviour {
 		return tile.sprite;
 	}
 
-	private IEnumerator RestartCoroutine() {
-		yield return new WaitForSeconds (1.5f);
-		this.Restart ();
-		//Application.LoadLevel("Main");
+	public Sprite BackgroundSpriteForActorId(int actorId) {
+		GameObject g = this.actorPrefabs[actorId - 1]; //FFFF
+		if (g == null) {
+			return null;
+		}
+
+		Tile tile = g.GetComponent<Tile> ();
+		return tile.backgroundSprite;
 	}
 
-	private List<Actor> GenerateBlocks() {
+	public Colorable ColorableForActorId(int actorId) {
+		List<Actor> a = this.ActorsWithId(actorId);
+		if (a.Count == 0) {
+			return null;
+		}
+
+		GameObject g = a[0].gameObject;
+		Colorable c = g.GetComponent<Colorable> ();
+		return c;
+	}
+
+	private IEnumerator RestartCoroutine() {
+		yield return new WaitForSeconds (1.5f);
+		if (this.hasLost) {
+			// todo: show prompt
+			this.BackButtonPressed();
+		} else {
+			this.Restart();
+		}
+	}
+
+	private List<Actor> GenerateObstacles() {
 		List<Actor> blockActors = new List<Actor> ();
 		foreach (int blockId in Actor.blockIds) {
 			GameObject prefab = this.actorPrefabs [blockId - 1];
@@ -761,8 +783,14 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	public void UpdateLives() {
-		for (int i = 0; i < this.initialLives - this.lives; i++) {
-			this.mouseLivesImages[i].sprite = this.lifeLoseSprite;
+		for (int i = 0; i < this.mouseLivesImages.Count && i < this.mouseLivesBackgrounds.Count; i++) {
+			if (i < this.initialLives - this.lives) {
+				this.mouseLivesImages[i].sprite = this.lifeLoseSprite;
+				this.mouseLivesBackgrounds[i].sprite = this.lifeLoseBackground;
+			}
+			if (this.mouse != null) {
+				this.mouseLivesBackgrounds[i].color = this.mouse.colorable.GetSelectedColor();
+			}
 		}
 	}
 
