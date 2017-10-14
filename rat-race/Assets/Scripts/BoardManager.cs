@@ -619,7 +619,6 @@ public class BoardManager : MonoBehaviour {
 		}
 
 		bool wins = this._boardState[cheeseSlot.y, cheeseSlot.x] == Actor.mouseId;
-		PrintBoardState(_boardState);
 		this.StartCoroutine (Reveal ((Tile.animationDuration + delay) * i, wins));
 
 //		List<Instruction>.Enumerator e = this.instructions.GetEnumerator ();
@@ -729,19 +728,19 @@ public class BoardManager : MonoBehaviour {
 		List<Actor> blockActors = new List<Actor> ();
 		foreach (GameObject prefab in this.actorPrefabs) {
 			Actor actor = prefab.GetComponent<Actor> ();
-			if (!(actor.isBlock || actor.isMagnet)) {
+			if (!(actor.isBlock || actor.isMagnet) || actor.myActorId == Actor.mouseId) {
 				continue;
 			}
-			if (actor.minLevel >= this.CurrentLevel()) {
+			if (actor.minLevel > this.CurrentLevel()) {
 				continue;
 			}
 				
 			// choose random params
-			int level = this.CurrentLevel();
-			int numPiecesScale = Mathf.Max(level * actor.avgPieceLevelScale, 1);
-			int mouseProximityScale = Mathf.Max(level * actor.avgPieceLevelScale, 1);
-			int numPieces = numPiecesScale * Random.Range(actor.avgPieces - actor.avgPieceDeviation, actor.avgPieces + actor.avgPieceDeviation + 1);
-			int mouseProximity = numPiecesScale *  Random.Range (actor.avgMouseProximity - actor.avgMouseDeviation, actor.avgMouseProximity + actor.avgMouseDeviation + 1);
+			int level = this.CurrentLevel() - actor.minLevel;
+			float numPiecesScale = Mathf.Max(level * actor.avgPieceLevelScale, 1.0f);
+			float mouseProximityScale = Mathf.Max(level * actor.avgMouseLevelScale, 1.0f);
+			int numPieces = (int)(numPiecesScale * Random.Range(actor.avgPieces - actor.avgPieceDeviation, actor.avgPieces + actor.avgPieceDeviation + 1));
+			int mouseProximity = (int)(mouseProximityScale * Random.Range(actor.avgMouseProximity - actor.avgMouseDeviation, actor.avgMouseProximity + actor.avgMouseDeviation + 1));
 
 			// generate prefab at locations and attach to slots
 			Slot initialSlot = this.mouse.slot;
