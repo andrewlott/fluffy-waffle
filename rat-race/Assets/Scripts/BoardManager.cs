@@ -553,7 +553,7 @@ public class BoardManager : MonoBehaviour {
 
 		int level = this.CurrentLevel();
 		//int randomAmount = Random.Range (level, 2 * level);
-		int numberOfInstructions = level;
+		int numberOfInstructions = Mathf.Min(level, 10);
 
 		_boardState = this.GetBoardState ();
 //		this.PrintBoardState (_boardState);
