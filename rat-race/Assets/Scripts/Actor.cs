@@ -8,10 +8,10 @@ public class Actor : MonoBehaviour {
 	public int minLevel = 0;
 	public int avgPieces = 1;
 	public int avgPieceDeviation = 0;
-	public int avgPieceLevelScale = 0;
+	public float avgPieceLevelScale = 0;
 	public int avgMouseProximity = 0;
 	public int avgMouseDeviation = 0;
-	public int avgMouseLevelScale = 0;
+	public float avgMouseLevelScale = 0;
 
 	public List<int> affectingDirections = new List<int>(); // 1 is same, -1 is opposite
 

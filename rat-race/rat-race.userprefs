@@ -1,16 +1,16 @@
-﻿<Properties StartupItem="Assembly-CSharp.csproj">
+﻿<Properties StartupItem="rat-race.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/BoardManager.cs">
     <Files>
-      <File FileName="Assets/Scripts/BoardManager.cs" Line="616" Column="58" />
-      <File FileName="Assets/Scripts/Actor.cs" Line="81" Column="38" />
-      <File FileName="Assets/Scripts/Tile.cs" Line="54" Column="60" />
-      <File FileName="Assets/Scripts/Slot.cs" Line="6" Column="16" />
+      <File FileName="Assets/Scripts/BoardManager.cs" Line="742" Column="1" />
+      <File FileName="Assets/Scripts/Actor.cs" Line="14" Column="14" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/Users/andrewlott/Projects/fluffy-waffle/rat-race/Assets/Scripts/BoardManager.cs" line="776" column="1" />
+      <Breakpoint file="/Users/andrewlott/Projects/fluffy-waffle/rat-race/Assets/Scripts/BoardManager.cs" line="782" column="1" />
+      <Breakpoint file="/Users/andrewlott/Projects/fluffy-waffle/rat-race/Assets/Scripts/BoardManager.cs" line="887" column="1" />
+      <Breakpoint file="/Users/andrewlott/Projects/fluffy-waffle/rat-race/Assets/Scripts/BoardManager.cs" line="125" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />

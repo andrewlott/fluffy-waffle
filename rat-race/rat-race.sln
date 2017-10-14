@@ -1,7 +1,7 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2017
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rat-race", "rat-race.csproj", "{A9E70731-0157-CDDA-79BF-EEC7836FE0A6}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rat-race", "Assembly-CSharp.csproj", "{DA051F87-20BF-830D-0EF7-C7BB7270ED80}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,12 +9,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A9E70731-0157-CDDA-79BF-EEC7836FE0A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A9E70731-0157-CDDA-79BF-EEC7836FE0A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A9E70731-0157-CDDA-79BF-EEC7836FE0A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A9E70731-0157-CDDA-79BF-EEC7836FE0A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA051F87-20BF-830D-0EF7-C7BB7270ED80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA051F87-20BF-830D-0EF7-C7BB7270ED80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA051F87-20BF-830D-0EF7-C7BB7270ED80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA051F87-20BF-830D-0EF7-C7BB7270ED80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
 	EndGlobalSection
 EndGlobal
