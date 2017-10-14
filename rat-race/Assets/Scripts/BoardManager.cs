@@ -63,7 +63,7 @@ public class BoardManager : MonoBehaviour {
 
 	public bool hasCheeseBeenPlaced = false;
 	private bool hasLost = false;
-	private int level = 1;
+	private int rounds = 0;
 	private float startTime;
 	private int bonusTime;
 	private int lives;
@@ -93,7 +93,7 @@ public class BoardManager : MonoBehaviour {
 	void Update() {
 		if (!this.hasLost) {
 			this.UpdateTimerText();
-			this.CheckLoss(); // commented out for testing
+			this.CheckLoss();
 		} else if (!this.resultsView.activeInHierarchy) {
 			this.ShowResults();
 		}
@@ -101,16 +101,21 @@ public class BoardManager : MonoBehaviour {
 
 	private void CheckLoss() {
 		if (this.lives <= 0 || this.RemainingTime() <= 0) {
-			int highScore = PlayerPrefs.GetInt("highScore");
-			if (this.level > highScore) {
-				this.hasNewHighScore = true;
-				PlayerPrefs.SetInt("highScore", this.level);
-				Debug.LogFormat("New high score: {0}", this.level);
-			} else {
-				Debug.LogFormat("Score: {0}", this.level);
-			}
+			UpdateHighScore();
 
 			this.hasLost = true;
+		}
+	}
+
+	private void UpdateHighScore() {
+		int highScore = PlayerPrefs.GetInt("highScore");
+		int level = this.CurrentLevel();
+		if (level > highScore) {
+			this.hasNewHighScore = true;
+			PlayerPrefs.SetInt("highScore", level);
+			Debug.LogFormat("New high score: {0}", level);
+		} else {
+			Debug.LogFormat("Score: {0}", level);
 		}
 	}
 
@@ -118,12 +123,12 @@ public class BoardManager : MonoBehaviour {
 		this.startTime = Time.time;
 		this.lives = this.initialLives;
 		int difficulty = PlayerPrefs.GetInt("difficulty");
-		this.level = difficulty > this.level ? difficulty : this.level;
+		int level = Mathf.Max(1, difficulty);
+		this.rounds = this.DefaultRoundsForLevel(level);
 		this.resultsView.SetActive(false);
 	}
 
 	private void Restart() {
-		Debug.Log ("Restarting");
 		this.UpdateLevelText();
 
 		this.MakeBoard ();
@@ -133,11 +138,10 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	private int BoardRadiusForLevel() {
-		return 1 + ((int)Mathf.Log (this.level));
+		return Mathf.Max(this.CurrentLevel() / 2, 1); //1 + ((int)Mathf.Log (this.CurrentLevel()));
 	}
 
 	private void MakeBoard() {
-		Debug.LogFormat ("Level {0}", this.level);
 		foreach (Slot s in this.slots) {
 			GameObject.Destroy(s.gameObject);
 		}
@@ -547,12 +551,13 @@ public class BoardManager : MonoBehaviour {
 			GameObject.Destroy(child.gameObject);
 		}
 
-		int randomAmount = Random.Range (level, 2 * level);
+		int level = this.CurrentLevel();
+		//int randomAmount = Random.Range (level, 2 * level);
+		int numberOfInstructions = level;
 
 		_boardState = this.GetBoardState ();
-		Debug.Log (randomAmount);
-		this.PrintBoardState (_boardState);
-		while (this.instructions.Count < randomAmount) {
+//		this.PrintBoardState (_boardState);
+		while (this.instructions.Count < numberOfInstructions) {
 			InstructionSet instructionSet = this.RandomValidNextInstruction (_boardState);
 			if (instructionSet == null) {
 				this.instructions.RemoveAt (this.instructions.Count - 1);
@@ -614,9 +619,7 @@ public class BoardManager : MonoBehaviour {
 		}
 
 		bool wins = this._boardState[cheeseSlot.y, cheeseSlot.x] == Actor.mouseId;
-		Debug.LogFormat("WINS: {0}", wins);
 		PrintBoardState(_boardState);
-		Debug.LogFormat("X: {0}, Y: {1}", cheeseSlot.x, cheeseSlot.y);
 		this.StartCoroutine (Reveal ((Tile.animationDuration + delay) * i, wins));
 
 //		List<Instruction>.Enumerator e = this.instructions.GetEnumerator ();
@@ -672,7 +675,7 @@ public class BoardManager : MonoBehaviour {
 			Animator cheeseAnimator = this.cheese.GetComponentInChildren<Animator> ();
 			cheeseAnimator.SetTrigger("CheeseWin");
 			mouseAnimator.SetTrigger ("MouseWin");
-			this.level++;
+			this.rounds++;
 			this.bonusTime += this.bonusTimeInSeconds;
 		} else {
 			mouseAnimator.SetTrigger ("MouseLose");
@@ -729,13 +732,16 @@ public class BoardManager : MonoBehaviour {
 			if (!(actor.isBlock || actor.isMagnet)) {
 				continue;
 			}
-			if (actor.minLevel >= this.level) {
+			if (actor.minLevel >= this.CurrentLevel()) {
 				continue;
 			}
 				
 			// choose random params
-			int numPieces = Random.Range(actor.avgPieces - actor.avgPieceDeviation, actor.avgPieces + actor.avgPieceDeviation + 1);
-			int mouseProximity = Random.Range (actor.avgMouseProximity - actor.avgMouseDeviation, actor.avgMouseProximity + actor.avgMouseDeviation + 1);
+			int level = this.CurrentLevel();
+			int numPiecesScale = Mathf.Max(level * actor.avgPieceLevelScale, 1);
+			int mouseProximityScale = Mathf.Max(level * actor.avgPieceLevelScale, 1);
+			int numPieces = numPiecesScale * Random.Range(actor.avgPieces - actor.avgPieceDeviation, actor.avgPieces + actor.avgPieceDeviation + 1);
+			int mouseProximity = numPiecesScale *  Random.Range (actor.avgMouseProximity - actor.avgMouseDeviation, actor.avgMouseProximity + actor.avgMouseDeviation + 1);
 
 			// generate prefab at locations and attach to slots
 			Slot initialSlot = this.mouse.slot;
@@ -863,11 +869,29 @@ public class BoardManager : MonoBehaviour {
 		return ret;
 	}
 
+	public int CurrentLevel() {
+		return this.LevelForRounds(this.rounds);
+	}
+
+	public int LevelForRounds(int rounds) {
+		int i = 1;
+		while (rounds > i) {
+			rounds -= i;
+			i++;
+		}
+
+		return i;
+	}
+
+	public int DefaultRoundsForLevel(int level) {
+		return (level * (level + 1)) / 2;
+	}
+
 
 	#region - UI
 
 	public void UpdateLevelText() {
-		this.levelText.text = string.Format("Level {0}", this.level);
+		this.levelText.text = string.Format("Level {0}", this.CurrentLevel());
 	}
 
 	public void UpdateTimerText() {
@@ -898,22 +922,13 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	public void BackButtonPressed() {
+		UpdateHighScore();
 		Application.LoadLevel("SplashScreen");
-	}
-
-	public int ReverseFactorial(int i) {
-		int divisor = 1;
-		while (i / divisor >= 1) {
-			i /= divisor;
-			divisor++;
-		}
-
-		return divisor;
 	}
 
 	public void ShowResults() {
 		this.resultsView.SetActive(true);
-		this.resultScoreText.text = string.Format("Score: {0}", this.level); // should be based on time for each, w/ auto level setup using some default time
+		this.resultScoreText.text = string.Format("Score: {0}", this.CurrentLevel()); // should be based on time for each, w/ auto level setup using some default time
 		if (!this.hasNewHighScore) {
 			this.resultNewHighScoreText.text = "";
 		}

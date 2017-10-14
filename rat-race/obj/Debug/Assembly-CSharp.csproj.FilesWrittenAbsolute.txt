@@ -20,3 +20,13 @@
 /Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.Analytics.dll
 /Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.HoloLens.dll
 /Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.VR.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.Timeline.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.UIAutomation.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.GoogleAudioSpatializer.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.SpatialTracking.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/UnityEngine.Purchasing.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/Unity.Cecil.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/ExCSS.Unity.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/Unity.Legacy.NRefactory.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/Unity.Cecil.Pdb.dll
+/Users/andrewlott/Projects/fluffy-waffle/rat-race/Temp/bin/Debug/Unity.Cecil.Mdb.dll
