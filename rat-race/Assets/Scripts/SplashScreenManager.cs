@@ -7,8 +7,11 @@ public class SplashScreenManager : MonoBehaviour {
 	public Slider slider;
 	public Text highScoreText;
 	public Text difficultyText;
+	public GameObject instructionsView;
 
 	void Start () {
+		this.instructionsView.SetActive(false);
+
 		int highScore = PlayerPrefs.GetInt("highScore");
 		if (highScore > 0) {
 			this.highScoreText.text = string.Format("Highest Level: {0}", highScore);
@@ -42,5 +45,9 @@ public class SplashScreenManager : MonoBehaviour {
 
 	public void LoadGame() {
 		Application.LoadLevel("Main");
+	}
+
+	public void ToggleInstructions() {
+		this.instructionsView.SetActive(!this.instructionsView.activeInHierarchy);
 	}
 }

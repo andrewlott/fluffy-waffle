@@ -1,16 +1,16 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/SplashScreenManager.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/BoardManager.cs">
     <Files>
-      <File FileName="Assets/Scripts/BoardManager.cs" Line="568" Column="3" />
-      <File FileName="Assets/Scripts/SplashScreenManager.cs" Line="13" Column="3" />
+      <File FileName="Assets/Scripts/BoardManager.cs" Line="616" Column="58" />
+      <File FileName="Assets/Scripts/Actor.cs" Line="81" Column="38" />
+      <File FileName="Assets/Scripts/Tile.cs" Line="54" Column="60" />
+      <File FileName="Assets/Scripts/Slot.cs" Line="6" Column="16" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/Users/andrewlott/Projects/fluffy-waffle/rat-race/Assets/Scripts/BoardManager.cs" line="464" column="25" />
-      <Breakpoint file="/Users/andrewlott/Projects/fluffy-waffle/rat-race/Assets/Scripts/BoardManager.cs" line="312" column="1" />
-      <Breakpoint file="/Users/andrewlott/Projects/fluffy-waffle/rat-race/Assets/Scripts/BoardManager.cs" line="311" column="1" />
+      <Breakpoint file="/Users/andrewlott/Projects/fluffy-waffle/rat-race/Assets/Scripts/BoardManager.cs" line="776" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />

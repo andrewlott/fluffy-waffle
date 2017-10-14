@@ -15,16 +15,6 @@ public class Slot : MonoBehaviour {
 		this.tile = null;
 	}
 
-	// Use this for initialization
-	void Start () {
-
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
 	void OnMouseUp() {
 		if (BoardManager.Instance ().hasCheeseBeenPlaced) {
 			return;
