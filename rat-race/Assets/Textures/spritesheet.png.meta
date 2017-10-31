@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 294586e3a874447628ba2d990a01a074
-timeCreated: 1508023798
+timeCreated: 1509423151
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -52,6 +52,7 @@ TextureImporter:
     21300090: bg_3
     21300092: pixel_square
     21300094: pixel_circle
+    21300096: spritesheet_emblem
   externalObjects: {}
   serializedVersion: 4
   mipmaps:
@@ -809,6 +810,20 @@ TextureImporter:
         y: 198
         width: 20
         height: 20
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: spritesheet_emblem
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 96
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
