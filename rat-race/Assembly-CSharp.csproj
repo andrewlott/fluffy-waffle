@@ -57,6 +57,7 @@
      <Compile Include="Assets\Scripts\Colorable.cs" />
      <Compile Include="Assets\Scripts\Extensions.cs" />
      <Compile Include="Assets\Scripts\Instruction.cs" />
+     <Compile Include="Assets\Scripts\MenuItems.cs" />
      <Compile Include="Assets\Scripts\Obstacle.cs" />
      <Compile Include="Assets\Scripts\Slot.cs" />
      <Compile Include="Assets\Scripts\SplashScreenManager.cs" />
