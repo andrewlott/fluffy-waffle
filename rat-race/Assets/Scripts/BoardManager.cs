@@ -49,6 +49,8 @@ public class BoardManager : MonoBehaviour {
 	[SerializeField]
 	Text timerText;
 	[SerializeField]
+	GameObject livesContainer;
+	[SerializeField]
 	List<Image> mouseLivesImages;
 	[SerializeField]
 	List<Image> mouseLivesBackgrounds;
@@ -100,7 +102,7 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	private void CheckLoss() {
-		if (this.lives <= 0 || this.RemainingTime() <= 0) {
+		if ((this.lives <= 0 && this.initialLives > 0) || this.RemainingTime() <= 0) {
 			UpdateHighScore();
 
 			this.hasLost = true;
@@ -126,6 +128,7 @@ public class BoardManager : MonoBehaviour {
 		int level = Mathf.Max(1, difficulty);
 		this.rounds = this.DefaultRoundsForLevel(level);
 		this.resultsView.SetActive(false);
+		this.livesContainer.SetActive(this.initialLives > 0);
 	}
 
 	private void Restart() {
@@ -886,7 +889,6 @@ public class BoardManager : MonoBehaviour {
 		return (level * (level + 1)) / 2;
 	}
 
-
 	#region - UI
 
 	public void UpdateLevelText() {
@@ -909,6 +911,10 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	public void UpdateLives() {
+		if (this.initialLives < 1) {
+			return;
+		}
+
 		for (int i = 0; i < this.mouseLivesImages.Count && i < this.mouseLivesBackgrounds.Count; i++) {
 			if (i < this.initialLives - this.lives) {
 				this.mouseLivesImages[i].sprite = this.lifeLoseSprite;

@@ -63,6 +63,7 @@
      <Compile Include="Assets\Scripts\SplashScreenManager.cs" />
      <Compile Include="Assets\Scripts\Target.cs" />
      <Compile Include="Assets\Scripts\Tile.cs" />
+     <None Include="Assets\GitMerge-for-Unity\Editor\Resources\Licenses.txt" />
  <Reference Include="UnityEngine.UI">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

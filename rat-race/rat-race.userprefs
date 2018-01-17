@@ -1,11 +1,11 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/MenuItems.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/SplashScreenManager.cs">
     <Files>
-      <File FileName="Assets/Scripts/SplashScreenManager.cs" Line="50" Column="53" />
+      <File FileName="Assets/Scripts/SplashScreenManager.cs" Line="51" Column="2" />
       <File FileName="Assets/Scripts/BoardManager.cs" Line="652" Column="25" />
       <File FileName="Assets/Scripts/Actor.cs" Line="73" Column="22" />
-      <File FileName="Assets/Scripts/MenuItems.cs" Line="3" Column="3" />
+      <File FileName="Assets/Scripts/MenuItems.cs" Line="11" Column="2" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
