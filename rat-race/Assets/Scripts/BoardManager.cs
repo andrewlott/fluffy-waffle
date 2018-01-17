@@ -921,6 +921,9 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	public void FlashTimeDeltaText(int secondsDelta) {
+		if (secondsDelta == 0) {
+			return;
+		}
 		bool isNegative = secondsDelta < 0;
 		string secondsDeltaString = string.Format("{0}{1}", isNegative ? "" : "+", secondsDelta);
 
