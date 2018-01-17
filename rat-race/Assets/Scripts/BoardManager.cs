@@ -62,6 +62,8 @@ public class BoardManager : MonoBehaviour {
 	Text resultNewHighScoreText;
 	[SerializeField]
 	Text resultCongratsText;
+	[SerializeField]
+	Text flashText;
 
 	public bool hasCheeseBeenPlaced = false;
 	private bool hasLost = false;
@@ -78,6 +80,7 @@ public class BoardManager : MonoBehaviour {
 	private Tile mouse;
 	private Tile cheese;
 	private List<Actor> actors = new List<Actor>();
+	private Vector3 flashTextTarget;
 
 	private static BoardManager _instance;
 	public static BoardManager Instance() {
@@ -129,6 +132,7 @@ public class BoardManager : MonoBehaviour {
 		this.rounds = this.DefaultRoundsForLevel(level);
 		this.resultsView.SetActive(false);
 		this.livesContainer.SetActive(this.initialLives > 0);
+		this.flashText.gameObject.SetActive(false);
 	}
 
 	private void Restart() {
@@ -679,6 +683,7 @@ public class BoardManager : MonoBehaviour {
 			mouseAnimator.SetTrigger ("MouseWin");
 			this.rounds++;
 			this.bonusTime += this.bonusTimeInSeconds;
+			this.FlashTimeDeltaText(this.bonusTimeInSeconds);
 		} else {
 			mouseAnimator.SetTrigger ("MouseLose");
 			this.lives--;
@@ -900,7 +905,33 @@ public class BoardManager : MonoBehaviour {
 		System.TimeSpan timeSpan = System.TimeSpan.FromSeconds(seconds);
 		string timeText = string.Format("{0:D2}:{1:D2}", timeSpan.Minutes, timeSpan.Seconds);
 		this.timerText.text = timeText;
+
+		// handle flash text movement, alpha, dissappear here
+		if (flashText.IsActive()) {
+			float rate = 0.05f;
+			Color flashTextColor = flashText.color;
+			flashTextColor.a -= rate;
+			flashText.color = flashTextColor;
+			flashText.gameObject.transform.position = Vector3.Lerp(flashText.gameObject.transform.position, this.flashTextTarget, 0.1f);
+
+			if (flashText.color.a <= 0.0f) {
+				flashText.gameObject.SetActive(false);
+			}
+		}
 	}
+
+	public void FlashTimeDeltaText(int secondsDelta) {
+		bool isNegative = secondsDelta < 0;
+		string secondsDeltaString = string.Format("{0}{1}", isNegative ? "" : "+", secondsDelta);
+
+		this.flashText.text = secondsDeltaString;
+		this.flashText.color = isNegative ? Color.red : Color.blue;
+		this.flashText.transform.position = this.timerText.transform.position;
+		this.flashText.gameObject.SetActive(true);
+		Vector3 flashTextTargetOffset = (isNegative ? -1 : 1) * new Vector3(0.0f, 25.0f, 0.0f);
+		this.flashTextTarget = this.timerText.transform.position + flashTextTargetOffset;
+	}
+
 
 	public int RemainingTimeDisplay() {
 		return Mathf.RoundToInt(this.RemainingTime());
