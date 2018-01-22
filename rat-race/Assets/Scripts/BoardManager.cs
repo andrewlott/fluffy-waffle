@@ -17,7 +17,7 @@ public struct BoardAnimation {
 }
 
 public class BoardManager : MonoBehaviour {
-	public static float unit = 0.28f; // gus needs to fix tile sizes to fit
+	public static float unit = 0.28f;
 
 	[SerializeField]
 	int boardRadius;
@@ -907,17 +907,17 @@ public class BoardManager : MonoBehaviour {
 		this.timerText.text = timeText;
 
 		// handle flash text movement, alpha, dissappear here
-		if (flashText.IsActive()) {
-			float rate = 0.05f;
-			Color flashTextColor = flashText.color;
-			flashTextColor.a -= rate;
-			flashText.color = flashTextColor;
-			flashText.gameObject.transform.position = Vector3.Lerp(flashText.gameObject.transform.position, this.flashTextTarget, 0.1f);
+		//if (flashText.IsActive()) {
+			//float rate = 0.05f;
+			//Color flashTextColor = flashText.color;
+			//flashTextColor.a -= rate;
+			//flashText.color = flashTextColor;
+			//flashText.gameObject.transform.position = Vector3.Lerp(flashText.gameObject.transform.position, this.flashTextTarget, 0.1f);
 
-			if (flashText.color.a <= 0.0f) {
-				flashText.gameObject.SetActive(false);
-			}
-		}
+			//if (flashText.color.a <= 0.0f) {
+				//flashText.gameObject.SetActive(false);
+			//}
+		//}
 	}
 
 	public void FlashTimeDeltaText(int secondsDelta) {
@@ -929,7 +929,7 @@ public class BoardManager : MonoBehaviour {
 
 		this.flashText.text = secondsDeltaString;
 		this.flashText.color = isNegative ? Color.red : Color.blue;
-		this.flashText.transform.position = this.timerText.transform.position;
+		//this.flashText.transform.position = this.timerText.transform.position;
 		this.flashText.gameObject.SetActive(true);
 		Vector3 flashTextTargetOffset = (isNegative ? -1 : 1) * new Vector3(0.0f, 25.0f, 0.0f);
 		this.flashTextTarget = this.timerText.transform.position + flashTextTargetOffset;
