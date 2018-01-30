@@ -64,6 +64,10 @@ public class BoardManager : MonoBehaviour {
 	Text resultCongratsText;
 	[SerializeField]
 	Text flashText;
+	[SerializeField]
+	Animator flashTextAnimator;
+	[SerializeField]
+	float universalScale = 1.0f;
 
 	public bool hasCheeseBeenPlaced = false;
 	private bool hasLost = false;
@@ -132,7 +136,7 @@ public class BoardManager : MonoBehaviour {
 		this.rounds = this.DefaultRoundsForLevel(level);
 		this.resultsView.SetActive(false);
 		this.livesContainer.SetActive(this.initialLives > 0);
-		this.flashText.gameObject.SetActive(false);
+//		this.flashText.gameObject.SetActive(false);
 	}
 
 	private void Restart() {
@@ -142,10 +146,18 @@ public class BoardManager : MonoBehaviour {
 		this.MakeTiles ();
 		this.MakeInstructions ();
 		this.UpdateLives();
+		this.UpdateScale();
+	}
+
+	private void UpdateScale() {
+		this.universalScale = Mathf.Max(3.0f - Mathf.Sqrt(this.boardRadius - 1), 1.0f);
+		float instructionScale = this.boardRadius > 2 ? 1.0f : 1.5f;
+		this.gameObject.transform.localScale = new Vector3(universalScale, universalScale, 1.0f);
+		this.instructionArea.transform.localScale = new Vector3(instructionScale, instructionScale, 1.0f);
 	}
 
 	private int BoardRadiusForLevel() {
-		return Mathf.Max(this.CurrentLevel() / 2, 1); //1 + ((int)Mathf.Log (this.CurrentLevel()));
+		return Mathf.Min(Mathf.Max(this.CurrentLevel() / 2, 1), 5);
 	}
 
 	private void MakeBoard() {
@@ -162,8 +174,8 @@ public class BoardManager : MonoBehaviour {
 		for (int i = -boardRadius; i < boardRadius; i++) {
 			total = totalStart;
 			for (int j = -boardRadius; j < boardRadius; j++) {
-				Slot slot = Instantiate(slotPrefabs[total % slotPrefabs.Length]);
-				slot.gameObject.transform.SetParent(this.gameObject.transform);
+				Slot slot = Instantiate(slotPrefabs[total % slotPrefabs.Length], this.gameObject.transform);
+//				slot.gameObject.transform.SetParent(this.gameObject.transform);
 				slot.gameObject.transform.localPosition = new Vector3 (offset + j * unit, offset + i * unit, 0);
 				slot.index = this.slots.Count;
 				slot.x = j + boardRadius;
@@ -209,8 +221,8 @@ public class BoardManager : MonoBehaviour {
 		if (this.mouse != null) {
 			GameObject.Destroy (this.mouse.gameObject);
 		}
-		GameObject g = Instantiate (this.mousePrefab) as GameObject;
-		g.transform.SetParent(this.gameObject.transform);
+		GameObject g = Instantiate (this.mousePrefab, this.gameObject.transform) as GameObject;
+//		g.transform.SetParent(this.gameObject.transform);
 	
 		this.mouse = g.GetComponent<Tile> ();
 
@@ -571,8 +583,8 @@ public class BoardManager : MonoBehaviour {
 				continue;
 			}
 
-			GameObject g = Instantiate (this.instructionPrefab) as GameObject;
-			g.transform.SetParent(this.gameObject.transform);
+			GameObject g = Instantiate (this.instructionPrefab, this.instructionArea.transform) as GameObject;
+//			g.transform.SetParent(this.gameObject.transform);
 
 			Instruction instruction = g.GetComponent<Instruction>();
 			instruction.SetupWithInstructionSet (instructionSet);
@@ -605,8 +617,8 @@ public class BoardManager : MonoBehaviour {
 
 	public void CheesePlaced(Slot cheeseSlot) {
 		this.hasCheeseBeenPlaced = true;
-		this.cheese = Instantiate (BoardManager.Instance().cheesePrefab).GetComponentInChildren<Tile>();
-		this.cheese.gameObject.transform.SetParent(this.gameObject.transform);
+		this.cheese = Instantiate (BoardManager.Instance().cheesePrefab, this.gameObject.transform).GetComponentInChildren<Tile>();
+//		this.cheese.gameObject.transform.SetParent(this.gameObject.transform);
 		this.cheese.gameObject.transform.localPosition = cheeseSlot.transform.localPosition;
 		this.cheese.SetTarget(cheeseSlot.transform.localPosition);
 //		this.cheese.SetSlot (cheeseSlot);
@@ -759,8 +771,9 @@ public class BoardManager : MonoBehaviour {
 				if (slot == null) {
 					break;
 				}
-				GameObject g = Instantiate (prefab) as GameObject;
-				g.transform.SetParent(this.gameObject.transform);
+				GameObject g = Instantiate (prefab, this.gameObject.transform) as GameObject;
+
+//				g.transform.SetParent(this.gameObject.transform);
 
 				Tile tile = g.GetComponent<Tile> ();
 				this.JoinSlotAndTile (slot, tile);
@@ -933,6 +946,7 @@ public class BoardManager : MonoBehaviour {
 		this.flashText.gameObject.SetActive(true);
 		Vector3 flashTextTargetOffset = (isNegative ? -1 : 1) * new Vector3(0.0f, 25.0f, 0.0f);
 		this.flashTextTarget = this.timerText.transform.position + flashTextTargetOffset;
+		this.flashTextAnimator.SetTrigger("FlashText");
 	}
 
 
